@@ -463,27 +463,25 @@ app.post('/api/gemini/simulate-error', (req, res) => {
   res.status(400).json({ success: false, error: 'Invalid error simulation type.' });
 });
 
-// Start Server with Vite Dev or Static Production
-async function startServer() {
-  if (!isProduction) {
+// Start Server with Vite Dev in local development
+if (process.env.NODE_ENV !== 'production') {
+  const startServer = async () => {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
     app.use(vite.middlewares);
-  } else {
-    app.use(express.static(path.join(__dirname, 'dist')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-    });
-  }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Medi-RAG Server running on port ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Medi-RAG Server running on port ${PORT}`);
+    });
+  };
+
+  startServer().catch((err) => {
+    console.error('Failed to start server:', err);
   });
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-});
+export default app;
+
